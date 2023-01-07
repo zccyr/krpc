@@ -159,6 +159,19 @@
   
 # PROTOC工具安装及使用
 
+	windows下需要安装cygwin工具使用。
+	下面是安装步骤
+	1.http://cygwin.org 安装setup-x86_86_64.exe
+    下面有两个关键步骤：
+      
+      1)在 “Choose A Download sites”界面  
+	 	选择从互联网安装，在“USER URL”处输入以下地址：http://mirrors.163.com/cyrwin/
+		填写完毕后，点击“Add”按钮，然后选中 http://mirrors.163.com 然后点击：“下一步”
+      2）在“Select Packages”界面 
+         左上角选择 Category
+         此页面上的Devel包需要从“Default”改成“Install”
+         然后等待安装完成即可。
+
   * 必须使用定制的protoc编译命令来生成java类和java接口，标准的protoc 命令生成的java接口和java类不能满足要求
   
         Windows下： protoc-3.5.1.exe    放入path路径中以便c.sh脚本能找到此命令
@@ -170,6 +183,12 @@
 		cd protobuf
 		git checkout v3.5.1-krpc  # 必须使用此分支，其它分支不支持krpc
 		
+        【windows从cygwin安装的，需要额外的执行4条命令】
+		1. dos2unix autogen.sh 		
+		2. find . -name \*.m4|xargs dos2unix 
+        3. find . -name \*.ac|xargs dos2unix 
+		4. find . -name \*.am|xargs dos2unix 
+
 		./autogen.sh
 		./confgure
 		make
@@ -184,8 +203,11 @@
   
         cygwin/linux/mac下先确认 可通过命令行直接访问 protoc-3.5.1 了
 				输入命令：  protoc-3.5.1 --version  看到有输出 "libprotoc 3.5.1" 字样表示成功
+		[实测输入命令 protoc --version]
   
 		进入 test 目录，运行 ./c.sh   test  若无报错则表示安装成功， 成功后可生成 test_protos.jar  test_sources.jar  test.proto.pb 3个文件
+		[同样地，windows从cygwin安装的，执行./c.sh是不会通过的，先copy一个副本出来： cp c.sh c_temp.sh ,然后 执行命令 dos2unix c_temp.sh，使用 c.temp.sh 生成代码即可]
 		test_protos.jar  用于项目导入，加入此jar包后就可以直接进行开发了
 		test_sources.jar  test_protos.jar 对应的源文件，不用可修改c.sh不生成
 		test.proto.pb  对应的pb文件，仅用于http网关不使用test_protos.jar做动态路由，不用可修改c.sh不生成
+
