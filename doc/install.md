@@ -210,4 +210,8 @@
 		test_protos.jar  用于项目导入，加入此jar包后就可以直接进行开发了
 		test_sources.jar  test_protos.jar 对应的源文件，不用可修改c.sh不生成
 		test.proto.pb  对应的pb文件，仅用于http网关不使用test_protos.jar做动态路由，不用可修改c.sh不生成
+    * 添加了一个新的使用方式
+      	使用 tool/new_tool文件夹下的 c.sh 即可。
+      	linux/mac 使用方式 ./c.sh userservice.proto 
+      	cygwin下使用 ./compile.sh userservice.proto compile.sh是通过 dos2unix c.sh得到的。
 
