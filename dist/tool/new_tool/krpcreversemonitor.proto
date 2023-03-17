@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+import "krpcext.proto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+option java_package = "krpc.rpc.monitor.proto";
+option java_outer_classname = "ReverseMonitorProtos";
+// proto_version="1.0.0"
+
+service ReverseMonitorService {
+
+    option (krpc.serviceId) = 20000;
+
+    rpc runCmd(RunCmdReq) returns (RunCmdRes) { option (krpc.msgId) = 1; }; // 运行指令
+}
+
+message RunCmdReq {
+    string cmdId = 1;
+    string cmd = 2;
+    string params = 3;
+};
+
+message RunCmdRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+    string results = 3;
+};
+

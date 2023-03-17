@@ -1,0 +1,54 @@
+syntax="proto3";
+
+package krpc.rpc.core.proto;
+option java_package="krpc.rpc.core.proto";
+option java_outer_classname="RpcMetas";
+option java_multiple_files = true;
+
+message RpcMeta {
+
+    enum Direction { 
+        INVALID_DIRECTION = 0 ; 
+        REQUEST = 1; 
+        RESPONSE = 2; 
+    }
+    
+    message Trace { 
+        string peers = 1; // ip:port for each hop, format: addr1,addr2,...
+        string traceId = 2;
+        string parentSpanId = 3; // may be empty
+        string spanId = 4;
+        string tags = 5; // key/value pairs passing in the chain, format: k1=v1&k2=v2&...
+        int32 sampleFlag = 6; //  0=default(yes) 1=force 2=no
+        string dyeing = 7;
+        string stressDyeing = 8;
+        string mockSource = 9;
+        string atpId = 10;
+    }
+
+    Direction direction = 1;
+    int32 serviceId = 2;
+    int32 msgId = 3;
+    int32 sequence = 4;
+    int32 timeout = 5;  // client side timeout in milliseconds
+    int32 retCode = 6;
+    Trace trace = 7;
+    string attachment = 8; // oob data
+    int32 compress = 9; // compress type, 0=no compress, 1=gzip 2=snappy
+    int32 encrypt = 10; // encrypt type, 0=no encrypt, 1=encrypt
+    string clientId = 11;   // client id, unique for every client, used for signature
+    string signature = 12;   // signature=lower(hex(md5(xxx+clientId+body))), xxx is a config parameter
+
+    message Biz {
+        int32 productId = 1; // product line
+        string appId = 2;  // app id
+        string platform = 3; // platform: android ios web ...
+        string channelCode = 4; // channel
+        string cityCode = 5; // city code
+    }
+
+    Biz biz = 13;  // business data, not used by krpc framework
+    int32 serverTs = 14; // server duration
+
+};
+

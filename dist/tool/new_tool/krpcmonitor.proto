@@ -1,0 +1,291 @@
+syntax = "proto3";
+
+import "krpcext.proto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+option java_package = "krpc.rpc.monitor.proto";
+option java_outer_classname = "MonitorProtos";
+// proto_version="1.0.17"
+
+service MonitorService {
+
+    option (krpc.serviceId) = 2;
+
+    rpc reportRpcStat(ReportRpcStatReq) returns (ReportRpcStatRes) {
+        option (krpc.msgId) = 1;
+    }; // 上报rpc统计
+
+    rpc reportSystemInfo(ReportSystemInfoReq) returns (ReportSystemInfoRes) {
+        option (krpc.msgId) = 2;
+    }; // 上报系统信息
+
+    rpc reportAlarm(ReportAlarmReq) returns (ReportAlarmRes) {
+        option (krpc.msgId) = 3;
+    }; // 上报报警
+
+    rpc reportMeta(ReportMetaReq) returns (ReportMetaRes) {
+        option (krpc.msgId) = 4;
+    }; // 上报元数据
+
+    rpc reportData(ReportDataReq) returns (ReportDataRes) {
+        option (krpc.msgId) = 5;
+    }; // 上报自定义信息
+
+	rpc initConn(InitConnReq) returns (InitConnRes) {
+        option (krpc.msgId) = 10;
+    }; // 建立连接后发送初始消息
+	
+	rpc sendCmd(SendCmdReq) returns (SendCmdRes) {
+        option (krpc.msgId) = 11;
+    }; // 下发单条指令	
+	
+	rpc broadcastCmd(BroadcastCmdReq) returns (BroadcastCmdRes) {
+        option (krpc.msgId) = 12;
+    }; // 下发广播指令
+
+    rpc queryServiceCfg(QueryServiceCfgReq) returns (QueryServiceCfgRes) {
+        option (krpc.msgId) = 20;
+    }; // 获取微服务配置
+
+}
+
+message RpcStat {
+    int32 type = 1; // 类别 1=server 2=client 3=web 11=压测流量server 12=压测流量client 13=压测流量web 21=巡检流量server 22=巡检流量client 23=巡检流量web
+    int64 time = 2; // 时间戳，秒
+    int32 serviceId = 3; // 服务号
+    int32 msgId = 4; // 消息号
+    int32 success = 5; // 成功数
+    int32 failed = 6; // 失败数
+    int32 timeout = 7; // 超时数
+    repeated int32 timeUsed = 8; // 每个时间段的数量
+    repeated RetCodeStat retCodeStat = 9; // 错误码数
+    int32 minTs = 10; // 最小耗时
+    int32 maxTs = 11; // 最大耗时
+    int32 avgTs = 12; // 平均耗时
+    int32 minOts = 13; // 最小其他耗时
+    int32 maxOts = 14; // 最大其他耗时
+    int32 avgOts = 15; // 平均其他耗时
+    int32 netTsCount = 16; // 有网络耗时的数量
+    int32 minNetTs = 17; // 最小网络耗时
+    int32 maxNetTs = 18; // 最大网络耗时
+    int32 avgNetTs = 19; // 平均网络耗时
+    int32 p95 = 20; // 95线耗时
+    int32 p99 = 21; // 99线耗时
+    int32 p999 = 22; // 999线耗时
+    int32 std = 23; // 方差
+    string traceIds = 24; // TRACEID
+};
+
+message RetCodeStat {
+    int32 retCode = 1; // 错误码
+    int32 count = 2; // 数量
+    string traceId = 3; // TRACEID
+};
+
+message MetricStat {
+    int64 time = 1; // 时间戳，秒
+    string key = 2; // KEY metricCode#key1#key2#key3#key4#key5
+    double value = 3; // 值
+};
+
+message ReportRpcStatReq {
+    int64 timestamp = 1; // 时间戳， 毫秒
+    string host = 2; // IP地址
+    string appName = 3; // 服务名
+    repeated RpcStat stats = 4; // RPC统计
+    int32 appId = 5; // 服务号
+    repeated MetricStat metricStat = 6; // 指标统计
+};
+
+message ReportRpcStatRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+message SystemInfoKV {
+    string key = 1; // KEY
+    string value = 2; // VALUE
+};
+
+message ReportSystemInfoReq {
+    int64 timestamp = 1; // 时间戳， 毫秒
+    string host = 2; // IP地址
+    string appName = 3; // 服务名
+    repeated SystemInfoKV kvs = 4; // KV数据
+    int32 appId = 5; // 服务号
+};
+
+message ReportSystemInfoRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+message AlarmInfo {
+    int64 time = 1; // 时间戳， 秒
+    string type = 4; // 告警编号
+    string msg = 5; // 告警消息
+    int32 count = 6; // 告警数量，本地累计后合并为1
+    string target = 7; // 目标类型
+    string targetAddrs = 8; // 目标地址
+    string traceId = 9; // TRACEID
+    string level = 10; // 告警等级
+};
+
+message ReportAlarmReq {
+    int64 timestamp = 1; // 时间戳， 毫秒
+    string host = 2; // IP地址
+    string appName = 3; // 服务名
+    repeated AlarmInfo info = 4; // 告警信息
+    int32 appId = 5; // 服务号
+};
+
+message ReportAlarmRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+
+message ReportDataReq {
+    int64 timestamp = 1; // 时间戳，毫秒
+    string host = 2; // IP地址
+    string appName = 3; // 服务名
+    int32 appId = 4; // 服务号
+    int32 dataType = 5; // data type  1=secInfo
+    string data = 6; // json string
+};
+
+message ReportDataRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+
+message MetaInfo {
+    int32 type = 1; // 元数据类别 1=serviceId 2=serviceId.msgId  3=errorCode
+    string value = 2; //
+    string text = 3; //
+};
+
+message ReportMetaReq {
+    int64 timestamp = 1; // 时间戳，毫秒
+    string host = 2; // IP地址
+    string appName = 3; // 服务名
+    int32 appId = 4; // 服务号
+    repeated MetaInfo info = 5; // 元数据信息
+};
+
+message ReportMetaRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+
+message InitConnReq {
+    int32 appId = 1; // 服务号
+    string appName = 2; // 服务名
+    string host = 3; // IP地址
+    int64 timestamp = 4; // 时间戳，毫秒
+};
+
+message InitConnRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+};
+
+message SendCmdReq {
+    string cmdId = 1; // 指令唯一标识
+    string cmd = 2; // 指令类别
+    string params = 3; // 参数
+    int32 serviceId = 4; // 服务号
+    string ip = 5; // IP地址
+    string flag = 6; // 标志
+};
+
+message SendCmdRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+    string results = 3; // 运行结果
+};
+
+message BroadcastCmdReq {
+    string cmdId = 1; // 指令唯一标识
+    string cmd = 2; // 指令类别
+    string params = 3; // 参数
+    string serviceIds = 4; // 服务号,多个用逗号隔开
+    string ips = 5; // IP地址,多个用逗号隔开
+    string flag = 6;	 // 标志
+};
+
+message ResultInfo {
+    int32 serviceId = 1; // 服务号
+    string ip = 2; // IP地址
+    int32 retCode = 3; // 运行错误码
+    string retMsg = 4; // 运行错误描述
+    string results = 5; // 运行结果
+};
+
+message BroadcastCmdRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+    repeated ResultInfo info = 3; // 结果信息
+};
+
+message QueryServiceCfgReq {
+    int32 appId = 1; // 服务号
+    string appName = 2; // 服务名
+    string host = 3; // IP地址
+
+    string allConns = 11; // 所有连接信息 废弃
+    string referServiceIds = 12; // 依赖的服务号
+    string refererWeightsMd5 = 13; // 依赖的服务权重配置MD5
+    string mockRulesMd5 = 14; // MOCK规则配置MD5
+    string limiterRulesMd5 = 15; // 限流规则配置MD5
+    string breakerRulesMd5 = 16; // 熔断规则配置MD5
+    string logRulesMd5 = 17; // 日志规则配置MD5
+    string metricParseRulesMd5 = 20; // 指标采集规则配置MD5
+    string sampleRateRulesMd5 = 21; // 采样率配置规则MD5
+    string errorLogRulesMd5 = 22; // 错误日志上报规则MD5
+    string auditLogReportRulesMd5 = 23; // 审计日志上报规则MD5
+    string logServerIpsMd5 = 24; // 日志接收服务的地址MD5
+};
+
+message QueryServiceCfgRes {
+    int32 retCode = 1;
+    string retMsg = 2;
+
+    int32 refererWeightsMd5Changed = 13; // 依赖的服务权重配置是否有变化
+    string refererWeights = 130; // 依赖的服务权重配置
+    int32 mockRulesMd5Changed = 14; // MOCK规则是否有变化
+    string mockRules = 140; // MOCK规则
+    int32 limiterRulesMd5Changed = 15; // 限流规则是否有变化
+    string limiterRules = 150; // 限流规则
+    int32 breakerRulesMd5Changed = 16; // 熔断规则是否有变化
+    string breakerRules = 160; // 熔断规则
+    int32 logRulesMd5Changed = 17; // 日志规则是否有变化
+    string logRules = 170; // 日志规则
+    int32 sampleRate = 180; // 全链路采样率
+    int32 nodesCount = 190; // 服务节点数量
+    int32 metricParseRulesMd5Changed = 20; // 指标采集规则是否有变化
+    string metricParseRules = 200; // 指标采集规则
+    int32 sampleRateRulesMd5Changed = 21; // 采样率配置规则是否有变化
+    string sampleRateRules = 210; // 采样率配置规则
+    int32 errorLogRulesMd5Changed = 22; // 错误日志规则是否变化
+    string errorLogRules = 220; // 错误日志规则
+    int32 auditLogReportRulesMd5Changed = 23; // 审计日志上报规则是否变化
+    string auditLogReportRules = 230; // 审计日志上报规则
+    int32 logServerIpsMd5Changed = 24; // 日志接收服务的地址是否变化
+    string logServerIps = 240; // 日志接收服务的地址
+};
+
+message LogMsg {
+    int64 timestamp = 1; // 时间戳，毫秒
+    int32 appId = 2; // 服务号
+    string appName = 3; // 服务名
+    string host = 4; // IP地址
+    int32 stress = 5; // 是否压测流量
+    int32 hasAtpId = 6; // 是否带atpId标识
+    int32 dataType = 7; // data type  1=server.log 2=client.log 3=all.log
+    string data = 8; // content
+}
+

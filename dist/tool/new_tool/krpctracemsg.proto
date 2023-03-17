@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "krpcext.proto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+option java_package = "krpc.trace.adapter.proto";
+option java_outer_classname = "TraceProtos";
+
+message TraceTagMsg {
+    int64 startMillis = 1;
+    string key = 2;
+    string value = 3;
+}
+
+message TraceMetricMsg {
+    int64 startMillis = 1;
+    string key = 2;
+    int32 type = 3; // COUNT=1  QUANTITY = 2  SUM = 3  QUANTITY_AND_SUM = 4
+    string value = 4;
+}
+
+message TraceEventMsg {
+    int64 startMillis = 1;
+    string type = 2;
+    string action = 3;
+    string status = 4;
+    string data = 5;
+}
+
+message TraceSpanMsg {
+    int64 startMillis = 1;
+    string type = 2;
+    string action = 3;
+    string status = 4;
+    int64 stopMillis = 5;
+    int64 timeUsedMicros = 6;
+    string data = 7;
+    int32 serviceId = 8;
+    int32 msgId = 9;
+
+    repeated TraceSpanMsg spans = 10;
+    repeated TraceTagMsg tags = 11;
+    repeated TraceMetricMsg metrics = 12;
+    repeated TraceEventMsg events = 13;
+}
+
+message TraceMsg {
+    int32 serviceId = 1;
+    string serviceName = 2;
+    string ip = 3;
+    string dyeing = 4;
+    string traceId = 5;
+    string parentSpanId = 6;
+    string spanId = 7;
+    TraceSpanMsg span = 8;
+    string asyncSpanSourceInfo = 9; // serviceId,msgId,type,action
+    int32 flags = 10; // special flags
+}
+
